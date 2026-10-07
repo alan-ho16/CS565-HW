@@ -22,3 +22,22 @@ Input: nums = [3,3], target = 6
 Output: [0,1]
 
 **/
+
+const input = [1, 3, 5, 10, 13];
+const target = 16;
+const list = two_sum(input, target);
+console.log(list);
+
+function two_sum(input, target) {
+  const list = [];
+  for (let i = 0; i < input.length; i++) {
+    for (let j = i + 1; j < input.length; j++) {
+      if (i != j && input[i] + input[j] == target) {
+        list.push(i);
+        list.push(j);
+        break;
+      }
+    }
+  }
+  return list;
+}
