@@ -28,7 +28,42 @@ app.get('/', (req, res) => {
 });
 
 // Add your code here
+app.get('/welcome', (req, res) => {
+  res.status(200).send('<h1>Welcome!</h1><p>Welcome to the this page.</p>');
+});
 
+app.get('/redirect', (req, res) => {
+  res.redirect(302, '/redirected');
+});
+
+app.get('/redirected', (req, res) => {
+  res
+    .status(200)
+    .send('<h1>Redirected Page</h1><p>You have been redirected here.</p>');
+});
+
+app.get('/cache', (req, res) => {
+  res.set('Cache-Control', 'public, max-age=86400');
+  res.status(200).send('<h1>Cache Test</h1><p>this resource was cached</p>');
+});
+
+app.get('/cookie', (req, res) => {
+  res.cookie('hello', 'world');
+  // uses utf-8 to fix ellipses byte error
+  res.type('text/plain; charset=utf-8');
+  res.status(200).send('cookies… yummm');
+});
+
+// 404 Catch-All -- Checks if requested path is in the routes array
+app.use((req, res) => {
+  const path = req.path.replace('/', '');
+
+  if (!routes.includes(path)) {
+    return res.status(404).send('<h1>404 - page not found</h1>');
+  }
+
+  res.status(404).send('<h1>404 - page not found</h1>');
+});
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
 });
