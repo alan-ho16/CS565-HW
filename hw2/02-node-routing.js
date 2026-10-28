@@ -12,18 +12,56 @@ const port = process.env.PORT || 5001;
 // For other routes, such as http://localhost:5001/other, this exercise should return a status code 404 with '404 - page not found' in html format
 
 const server = http.createServer((req, res) => {
-  const routes = [
-    'welcome',
-    'redirect',
-    'redirected',
-    'cache',
-    'cookie',
-    'other',
-  ];
+  // get new url using the split req
+  const { pathname } = new URL(req.url, `http://${req.headers.host}`);
 
-  res.writeHead(200, { 'Content-Type': 'text/html' });
-  res.write('Node Routing Exercise');
-  res.end();
+  // switch and case for each separate route
+
+  switch (pathname) {
+    case '/': {
+      res.writeHead(200, { 'Content-Type': 'text/html' });
+      res.write('Node Routing Exercise');
+      res.end();
+      break;
+    }
+    case '/welcome': {
+      res.writeHead(200, { 'Content-Type': 'text/html' });
+      res.end('<h1>Welcome!</h1><p>Welcome to this page.</p>');
+      break;
+    }
+    case '/redirect': {
+      res.writeHead(302, { Location: '/redirected' });
+      res.end();
+      break;
+    }
+    case '/redirected': {
+      res.writeHead(200, { 'Content-Type': 'text/html' });
+      res.end('<h1>Redirected Page</h1><p>You have been redirected here.</p>');
+      break;
+    }
+    case '/cache': {
+      res.writeHead(200, {
+        'Content-Type': 'text/html',
+        'Cache-Control': 'public, max-age=86400',
+      });
+      res.end('<h1>Cache Test</h1><p>this resource was cached</p>');
+      break;
+    }
+    case '/cookie': {
+      res.writeHead(200, {
+        // set charset to fix ellipses byte error
+        'Content-Type': 'text/plain; charset=utf-8',
+        'Set-Cookie': 'hello=world',
+      });
+      res.end('cookies… yummm');
+      break;
+    }
+    default: {
+      res.writeHead(404, { 'Content-Type': 'text/html' });
+      res.end('<h1>404 - page not found</h1>');
+      break;
+    }
+  }
 });
 
 server.listen(port, () => {

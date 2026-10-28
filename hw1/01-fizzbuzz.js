@@ -26,3 +26,48 @@ Input: n = 15
 Output: ["1","2","Fizz","4","Buzz","Fizz","7","8","Fizz","Buzz","11","Fizz","13","14","FizzBuzz"]
 
 **/
+const readline = require("readline");
+
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+});
+
+function askNumber() {
+  rl.question("Enter a number: ", (input) => {
+    let validNumber = Number(input);
+
+    if (
+      input === null ||
+      input.trim() === "" ||
+      isNaN(validNumber) ||
+      validNumber < 1
+    ) {
+      console.log("Please enter a valid number 1 or above.");
+      askNumber();
+    } else {
+      console.log("Valid number entered:", validNumber);
+      rl.close();
+
+      const result = get_fizz_buzz(validNumber);
+      console.log(JSON.stringify(result));
+    }
+  });
+}
+function get_fizz_buzz(number) {
+  const fizz_buzz_array = [];
+  for (let i = 1; i <= number; i++) {
+    if (!(i % 3) && !(i % 5)) {
+      fizz_buzz_array.push("FizzBuzz");
+    } else if (!(i % 3)) {
+      fizz_buzz_array.push("Fizz");
+    } else if (!(i % 5)) {
+      fizz_buzz_array.push("Buzz");
+    } else {
+      fizz_buzz_array.push(i.toString());
+    }
+  }
+  return fizz_buzz_array;
+}
+
+askNumber();
