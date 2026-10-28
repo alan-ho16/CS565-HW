@@ -8,8 +8,14 @@ const port = process.env.PORT || 5001;
 // used to parse incoming URL-encoded form data
 app.use(express.urlencoded({ extended: true }));
 
-const routes = ['form', 'submit'];
-
+const escapeHtml = function escapeHtml(value = '') {
+  return String(value)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+};
 //  Returns an HTML form with username, email, comments, newsletter sign up, and submit button
 app.get('/form', (req, res) => {
   res.status(200);
@@ -53,19 +59,45 @@ app.get('/form', (req, res) => {
 
 // POST -- Returns all the data the user entered
 app.post('/submit', (req, res) => {
-  res.status(200).json(req.body);
+  const {
+    username = '',
+    email = '',
+    comments = '',
+    newsletter = 'not subscribed',
+  } = req.body;
+
+  const safeUsername = escapeHtml(username);
+  const safeEmail = escapeHtml(email);
+  const safeComments = escapeHtml(comments);
+  const safeNewsletter = escapeHtml(newsletter);
+  res.status(200);
+  res.setHeader('Content-Type', 'text/html');
+  res.send(`
+    <!DOCTYPE html>
+    <html lang='en'>
+      <head>
+        <meta charset='UTF-8'>
+        <title>Submission Received</title>
+      </head>
+      <body>
+        <h1>Submission Received</h1>
+        <ul>
+          <li><strong>Username:</strong> ${safeUsername}</li>
+          <li><strong>Email:</strong> ${safeEmail}</li>
+          <li><strong>Comments:</strong> ${safeComments || '<em>None</em>'}</li>
+          <li><strong>Newsletter:</strong> ${safeNewsletter}</li>
+        </ul>
+        <a href='/form'>Back to Form</a>
+      </body>
+    </html>
+  `);
 });
 
 //404 Catch all
 app.use((req, res) => {
-  const path = req.path.replace('/', '');
-
-  if (!routes.includes(path)) {
-    return res.status(404).send('<h1>404 - page not found</h1>');
-  }
-
-  res.status(404).send('<h1>404 - page not found</h1>');
+  return res.status(404).send('<h1>404 - page not found</h1>');
 });
+
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
 });
