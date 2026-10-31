@@ -1,0 +1,11 @@
+doctype html
+html
+  head
+    title= title
+  body
+    h1 All Countries (A-Z)
+    ul
+      each country in countries
+        li
+          strong= country.name
+          |  — Capital: #{country.capital} | Leader: #{country.leader}

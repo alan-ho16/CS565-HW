@@ -1,0 +1,11 @@
+doctype html
+html
+  head
+    title= title
+  body
+    h1 World Regions (Total Countries: #{total})
+    each region in regions
+      h2 #{region.name} (#{region.count})
+      ul
+        each countryName in region.countries
+          li= countryName
