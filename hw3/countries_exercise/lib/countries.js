@@ -15,7 +15,7 @@ const FIELDS = [
   'currencies',
 ].join(',');
 
-async function fetchPage(offset) {
+const fetchPage = async (offset) => {
   const apiKey = process.env.RESTCOUNTRIES_API_KEY;
   if (!apiKey) {
     throw new Error(
@@ -34,7 +34,7 @@ async function fetchPage(offset) {
     throw new Error(`REST Countries error: ${message}`);
   }
   return body.data;
-}
+};
 
 const loadAll = async () => {
   const first = await fetchPage(0);
