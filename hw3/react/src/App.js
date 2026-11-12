@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import useState from 'react';
 import PropTypes from 'prop-types';
 
 const LINES = [
@@ -18,18 +18,18 @@ const ROWS = [
   [6, 7, 8],
 ];
 
-function calculateWinner(squares) {
+const calculateWinner = (squares) => {
   const winningLine = LINES.find(
     ([a, b, c]) =>
       squares[a] && squares[a] === squares[b] && squares[a] === squares[c],
   );
   return winningLine ? squares[winningLine[0]] : null;
-}
+};
 
 function Square({ index, value, onClick }) {
-  const handleClick = useCallback(() => {
+  const handleClick = () => {
     onClick(index);
-  }, [index, onClick]);
+  };
 
   return (
     <button type="button" className="square" onClick={handleClick}>
@@ -53,17 +53,14 @@ function Board({ xIsNext, squares, onPlay }) {
   const nextPlayer = xIsNext ? 'X' : 'O';
   const status = winner ? `Winner: ${winner}` : `Next player: ${nextPlayer}`;
 
-  const handleSquareClick = useCallback(
-    (i) => {
-      if (winner || squares[i]) {
-        return;
-      }
-      const nextSquares = [...squares];
-      nextSquares[i] = nextPlayer;
-      onPlay(nextSquares);
-    },
-    [nextPlayer, onPlay, squares, winner],
-  );
+  const handleSquareClick = (i) => {
+    if (winner || squares[i]) {
+      return;
+    }
+    const nextSquares = [...squares];
+    nextSquares[i] = nextPlayer;
+    onPlay(nextSquares);
+  };
 
   return (
     <>
@@ -93,9 +90,9 @@ Board.propTypes = {
 function MoveItem({ id, onJumpTo }) {
   const description = id > 0 ? `Go to move #${id}` : 'Go to game start';
 
-  const handleClick = useCallback(() => {
+  const handleClick = () => {
     onJumpTo(id);
-  }, [id, onJumpTo]);
+  };
 
   return (
     <li>
@@ -119,22 +116,15 @@ export default function Game() {
   const xIsNext = currentMove % 2 === 0;
   const { squares: currentSquares } = history[currentMove];
 
-  const handlePlay = useCallback(
-    (nextSquares) => {
-      const nextMove = currentMove + 1;
-      const nextHistory = [
-        ...history.slice(0, nextMove),
-        { id: nextMove, squares: nextSquares },
-      ];
-      setHistory(nextHistory);
-      setCurrentMove(nextMove);
-    },
-    [currentMove, history],
-  );
-
-  const handleJumpTo = useCallback((move) => {
-    setCurrentMove(move);
-  }, []);
+  const handlePlay = (nextSquares) => {
+    const nextMove = currentMove + 1;
+    const nextHistory = [
+      ...history.slice(0, nextMove),
+      { id: nextMove, squares: nextSquares },
+    ];
+    setHistory(nextHistory);
+    setCurrentMove(nextMove);
+  };
 
   return (
     <div className="game">
@@ -144,7 +134,7 @@ export default function Game() {
       <div className="game-info">
         <ol>
           {history.map(({ id }) => (
-            <MoveItem key={id} id={id} onJumpTo={handleJumpTo} />
+            <MoveItem key={id} id={id} onJumpTo={setCurrentMove} />
           ))}
         </ol>
       </div>
