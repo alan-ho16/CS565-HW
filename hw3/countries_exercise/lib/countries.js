@@ -12,25 +12,8 @@ const FIELDS = [
   'flag.url_svg',
   'flag.url_png',
   'region',
-  'leaders',
+  'currencies',
 ].join(',');
-
-// Leaders are paywalled, and on the free plan the API returns an
-// upgrade notice -- so I hardcoded some leaders.
-const leaders = {
-  USA: { name: 'Donald Trump', title: 'President' },
-  FRA: { name: 'Emmanuel Macron', title: 'President' },
-  GBR: { name: 'Keir Starmer', title: 'Prime Minister' },
-  DEU: { name: 'Friedrich Merz', title: 'Chancellor' },
-  CAN: { name: 'Mark Carney', title: 'Prime Minister' },
-  JPN: { name: 'Sanae Takaichi', title: 'Prime Minister' },
-  IND: { name: 'Narendra Modi', title: 'Prime Minister' },
-  CHN: { name: 'Xi Jinping', title: 'President' },
-  RUS: { name: 'Vladimir Putin', title: 'President' },
-  BRA: { name: 'Luiz Inácio Lula da Silva', title: 'President' },
-  MEX: { name: 'Claudia Sheinbaum', title: 'President' },
-  IDN: { name: 'Prabowo Subianto', title: 'President' },
-};
 
 async function fetchPage(offset) {
   const apiKey = process.env.RESTCOUNTRIES_API_KEY;
@@ -53,7 +36,7 @@ async function fetchPage(offset) {
   return body.data;
 }
 
-async function loadAll() {
+const loadAll = async () => {
   const first = await fetchPage(0);
   const total = first.meta?.total ?? first.objects.length;
 
@@ -64,7 +47,7 @@ async function loadAll() {
 
   const rest = await Promise.all(offsets.map((offset) => fetchPage(offset)));
   return [first, ...rest].flatMap((page) => page.objects);
-}
+};
 
 // Cache so the three routes share one download (3 requests total per hour).
 let cache = null;
@@ -72,7 +55,7 @@ let cachedAt = 0;
 let inFlight = null;
 const CACHE_MS = 60 * 60 * 1000;
 
-async function fetchCountries() {
+const fetchCountries = async () => {
   if (cache && Date.now() - cachedAt < CACHE_MS) return cache;
   if (inFlight) return inFlight;
 
@@ -87,7 +70,7 @@ async function fetchCountries() {
     });
 
   return inFlight;
-}
+};
 
 // Helpers for incomplete data
 
@@ -99,17 +82,13 @@ const capitalOf = (c) => {
   return names.length ? names.join(' / ') : 'N/A';
 };
 
-const leaderOf = (c) => {
-  // Use the API's data if the plan includes it (free plan returns a notice object).
-  const fromApi = Array.isArray(c.leaders)
-    ? c.leaders
-        .filter((l) => l?.name && l?.title)
-        .map((l) => `${l.title} ${l.name}`)
-    : [];
-  if (fromApi.length) return fromApi.join(', ');
+const currenciesOf = (c) => {
+  if (!Array.isArray(c.currencies) || !c.currencies.length) return 'N/A';
+  const formatted = c.currencies
+    .filter((curr) => curr?.name)
+    .map((curr) => (curr.symbol ? `${curr.name} (${curr.symbol})` : curr.name));
 
-  const fallback = leaders[c.codes?.alpha_3];
-  return fallback ? `${fallback.title} ${fallback.name}` : 'N/A';
+  return formatted.length ? formatted.join(', ') : 'N/A';
 };
 
 const flagOf = (c) => {
@@ -123,20 +102,20 @@ const flagOf = (c) => {
 
 // ---- ROUTE DATA ----
 
-// 1. All countries A-Z with capitals and leaders
-async function getAlphabetical() {
+// 1. All countries A-Z with capitals and currencies
+const getAlphabetical = async () => {
   const countries = await fetchCountries();
   return countries
     .map((c) => ({
       name: nameOf(c),
       capital: capitalOf(c),
-      leader: leaderOf(c),
+      currencies: currenciesOf(c),
     }))
     .sort((a, b) => a.name.localeCompare(b.name));
-}
+};
 
 // 2. Population >= 50M, most populous first, with flags
-async function getPopulous() {
+const getPopulous = async () => {
   const countries = await fetchCountries();
   return countries
     .filter((c) => (c.population || 0) >= MIN_POPULOUS)
@@ -146,10 +125,10 @@ async function getPopulous() {
       flag: flagOf(c),
     }))
     .sort((a, b) => b.population - a.population);
-}
+};
 
 // 3. Country count and names for every region
-async function getRegions() {
+const getRegions = async () => {
   const countries = await fetchCountries();
   const regionMap = {};
 
@@ -165,7 +144,7 @@ async function getRegions() {
       count: regionMap[name].length,
       countries: regionMap[name].sort((a, b) => a.localeCompare(b)),
     }));
-}
+};
 
 module.exports = {
   MIN_POPULOUS,
