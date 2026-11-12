@@ -151,7 +151,7 @@ npm install
 
 Start the server:
 bash
-npm start
+node index.js or npm start
 
 You should see listening on \*:3000 in the terminal.
 
@@ -171,4 +171,3 @@ Add --fix to auto-fix formatting issues.
 The config lives in .eslintrc.json:
 
 Airbnb flags the console.log calls with no-console warnings. They are intentional (they log connections), so either leave the warnings or add // eslint-disable-next-line no-console above each one.
-git
