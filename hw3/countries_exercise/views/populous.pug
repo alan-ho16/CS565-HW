@@ -1,0 +1,13 @@
+doctype html
+html
+  head
+    title= title
+  body
+    h1 Most Populous Countries (&ge; 50M)
+    ul
+      each country in countries
+        li
+          if country.flag
+            img(src=country.flag, alt=country.name, width="30", style="margin-right: 8px;")
+          strong= country.name
+          |  — Population: #{formatNumber(country.population)}
